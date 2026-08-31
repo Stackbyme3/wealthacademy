@@ -1,0 +1,31 @@
+:root{
+/* Plum — primary brand family, anchored to the logo/icon */
+--plum-5:#FBF3F7;--plum-10:#F5E4EE;--plum-20:#E9C2D9;--plum-40:#C97BA8;
+--plum-60:#9A4278;--plum-80:#6E2A4A;--plum-100:#431C34;--plum-120:#2A1120;--plum-140:#1A0A13;
+/* Pink — secondary accent, sampled from the app icon background */
+--pink-40:#FFD3DD;--pink-70:#FF9AB0;--pink-100:#FF6B87;--pink-120:#E24E71;
+/* Ocean — cool counterpoint for data/education moments */
+--ocean-10:#EAF3F5;--ocean-30:#BEDBE0;--ocean-60:#6FA9B3;--ocean-100:#3D7480;--ocean-120:#274F58;
+/* Sand — warm neutral scale, the everyday paper tones */
+--sand-5:#F5F1EB;--sand-10:#EDE6DB;--sand-20:#DED2C0;--sand-40:#C2AF95;
+--sand-75:#8C7A63;--sand-100:#6B5D4A;--sand-120:#4A3F32;
+/* Hot lemon — rarest color in the system, one CTA per screen max */
+--lemon-100:#F0FF6E;--lemon-120:#DCEB57;
+/* Functional */
+--green-100:#2E8B57;--red-100:#D64545;--yellow-100:#E8B33D;--blue-100:#3D7ADB;
+/* Semantic surfaces */
+--surface-plum-start:#1A0A13;--surface-plum-mid:#431C34;--surface-plum-end:#6E2A4A;
+--bg-canvas:var(--sand-5);--bg-surface:#FFFFFF;--bg-plum:var(--plum-100);
+--gradient-hero:radial-gradient(120% 120% at 50% 0%,var(--surface-plum-end) 0%,var(--surface-plum-mid) 45%,var(--surface-plum-start) 100%);
+/* Semantic text */
+--text-primary:#241019;--text-secondary:var(--sand-100);--text-tertiary:var(--sand-75);
+--text-inverse:#FFFFFF;--text-inverse-dim:rgba(255,255,255,0.72);--text-accent:var(--plum-100);
+/* Semantic borders */
+--border-default:rgba(67,28,52,0.18);--border-subtle:rgba(67,28,52,0.10);
+--border-glass:rgba(255,255,255,0.20);--border-glass-strong:rgba(255,255,255,0.32);
+/* Glass surface */
+--glass-fill:rgba(255,255,255,0.10);--glass-fill-hover:rgba(255,255,255,0.16);
+--glass-scrim:rgba(20,8,15,0.55);
+/* States */
+--state-hover-primary:#5A2645;--state-press-primary:#321628;--state-hover-row:rgba(67,28,52,0.04);--state-press-row:rgba(67,28,52,0.08);
+}
