@@ -1,46 +1,69 @@
-import { Card, Bar } from '../ui.jsx';
+import { Card } from '../ui.jsx';
 import { nok } from '../../lib/format.js';
 
+/** A guideline only — each share is applied to total income, nothing is compared. */
 const ROWS = [
-  { key: 'needs', name: 'Behov – det du må ha', color: 'var(--plum-100)', target: '50%' },
-  { key: 'wants', name: 'Ønsker – det som er gøy', color: 'var(--pink-100)', target: '30%' },
-  { key: 'savings', name: 'Sparing', color: 'var(--green-100)', target: '20%' },
+  {
+    name: 'Behov',
+    share: 0.5,
+    color: 'var(--plum-100)',
+    hint: 'Husleie, mat, strøm, lån, transport – det du må betale.',
+  },
+  {
+    name: 'Ønsker',
+    share: 0.3,
+    color: 'var(--pink-100)',
+    hint: 'Reiser, restaurant, shopping, abonnement – det som gjør livet gøy.',
+  },
+  {
+    name: 'Sparing',
+    share: 0.2,
+    color: 'var(--green-100)',
+    hint: 'Buffer, investering, nedbetaling av dyr gjeld – penger til deg selv.',
+  },
 ];
 
 export default function Rule({ totals }) {
-  const amounts = { needs: totals.costs, wants: totals.buffer, savings: totals.savings };
-  const percents = { needs: totals.needsPct, wants: totals.wantsPct, savings: totals.savingsPct };
-
   return (
     <Card>
       <div className="s-label" style={{ color: 'var(--text-primary)' }}>50/30/20-regelen</div>
       <div className="s-body" style={{ color: 'var(--text-tertiary)', marginTop: 4 }}>
-        «Du planla» hentes fra budsjettet ditt. Tommelfingerregelen er 50/30/20 — bare et pekepinn.
+        En pekepinn på hvordan inntekten din kan fordeles. Med sum inntekt {nok(totals.income)} blir
+        det slik.
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 20 }}>
-        {ROWS.map(({ key, name, color, target }) => (
-          <div key={key}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                gap: 12,
-              }}
-            >
-              <span className="s-body" style={{ color: 'var(--text-primary)' }}>{name}</span>
-              <span
-                className="s-numeric"
-                style={{ fontSize: 16, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}
-              >
-                {nok(amounts[key])} ({percents[key]})
-              </span>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))',
+          gap: 16,
+          marginTop: 24,
+        }}
+      >
+        {ROWS.map(({ name, share, color, hint }) => (
+          <div
+            key={name}
+            style={{ background: 'var(--sand-5)', borderRadius: 'var(--radius-card)', padding: 20 }}
+          >
+            <div className="s-eyebrow" style={{ color }}>
+              {share * 100} % · {name}
             </div>
-            <Bar pct={percents[key]} color={color} />
-            <div className="s-caption">Tommelfingerregel: {target}</div>
+            <div
+              className="s-numeric"
+              style={{ fontSize: 26, color: 'var(--text-primary)', marginTop: 4 }}
+            >
+              {nok(totals.income * share)}
+            </div>
+            <div className="s-body-sm" style={{ color: 'var(--text-tertiary)', marginTop: 8 }}>
+              {hint}
+            </div>
           </div>
         ))}
+      </div>
+
+      <div className="s-caption" style={{ marginTop: 16 }}>
+        Dette er en tommelfingerregel, ikke en fasit. Bor du dyrt, blir behov ofte større – det
+        viktige er at sparingen ikke blir null.
       </div>
     </Card>
   );

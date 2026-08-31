@@ -1,4 +1,4 @@
-import { Card, Bar, Eyebrow, PillButton } from '../ui.jsx';
+import { Card, Eyebrow, PillButton } from '../ui.jsx';
 import { nok, sparklinePoints, sum } from '../../lib/format.js';
 
 export default function Dashboard({ totals, lockedMonths, onChangeView }) {
@@ -44,20 +44,26 @@ export default function Dashboard({ totals, lockedMonths, onChangeView }) {
 
         <Card>
           <Eyebrow>50/30/20</Eyebrow>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
             {[
-              ['Behov', totals.needsPct, 'var(--plum-100)'],
-              ['Ønsker', totals.wantsPct, 'var(--pink-100)'],
-              ['Sparing', totals.savingsPct, 'var(--green-100)'],
-            ].map(([label, pct, color]) => (
-              <div key={label}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span className="s-body-sm" style={{ color: 'var(--text-primary)' }}>{label}</span>
-                  <span className="s-body-sm" style={{ color: 'var(--text-tertiary)' }}>{pct}</span>
-                </div>
-                <Bar pct={pct} color={color} height={8} />
+              ['50 % Behov', 0.5],
+              ['30 % Ønsker', 0.3],
+              ['20 % Sparing', 0.2],
+            ].map(([label, share]) => (
+              <div
+                key={label}
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
+              >
+                <span className="s-body-sm" style={{ color: 'var(--text-primary)' }}>{label}</span>
+                <span
+                  className="s-numeric"
+                  style={{ fontSize: 15, color: 'var(--text-primary)' }}
+                >
+                  {nok(totals.income * share)}
+                </span>
               </div>
             ))}
+            <div className="s-caption">Pekepinn ut fra sum inntekt</div>
           </div>
         </Card>
       </div>
