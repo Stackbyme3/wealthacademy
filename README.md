@@ -79,3 +79,5 @@ src/
 
 A month is editable only while `status === "draft"`. Locking it freezes the numbers and
 feeds the history table; starting a new month carries over assets/debts and the label set.
+
+On GitHub pages
