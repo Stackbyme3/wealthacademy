@@ -2,6 +2,33 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { PillButton } from '../components/ui.jsx';
 import { auth0Config } from './config.js';
 
+const TERMS_URL = 'https://stackby.me/betingelser-og-vilkar';
+
+function LoginConsent() {
+  return (
+    <p
+      className="s-body-sm"
+      style={{
+        color: 'rgba(255,255,255,0.75)',
+        textAlign: 'center',
+        margin: 0,
+        lineHeight: 1.5,
+      }}
+    >
+      Ved å opprette en profil godtar du{' '}
+      <a
+        href={TERMS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: 'inherit', textDecoration: 'underline' }}
+      >
+        vilkår og betingelser
+      </a>{' '}
+      og abonnement på vårt nyhetsbrev
+    </p>
+  );
+}
+
 export default function AuthGate() {
   const { loginWithRedirect, isLoading, error } = useAuth0();
   const { configured } = auth0Config();
@@ -72,6 +99,8 @@ export default function AuthGate() {
             {error.message}
           </div>
         )}
+
+        <LoginConsent />
 
         <PillButton
           variant="lemon"
