@@ -94,7 +94,8 @@ export default function StackUserBootstrap({ children }) {
     };
   }, [isAuthenticated, isLoading, ensureStackUser, retryKey]);
 
-  if (isLoading || phase === 'idle' || phase === 'ensuring') {
+  // Auth0 still hydrating
+  if (isLoading) {
     return (
       <div
         style={{
@@ -106,7 +107,29 @@ export default function StackUserBootstrap({ children }) {
           color: '#fff',
         }}
       >
-        {phase === 'ensuring' ? 'Kobler til Stack-konto…' : 'Laster…'}
+        Laster…
+      </div>
+    );
+  }
+
+  // Not logged in — render App → AuthGate (do not trap on idle spinner)
+  if (!isAuthenticated) {
+    return children;
+  }
+
+  if (phase === 'ensuring') {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          background: 'var(--gradient-hero)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#fff',
+        }}
+      >
+        Kobler til Stack-konto…
       </div>
     );
   }
