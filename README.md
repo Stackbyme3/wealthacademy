@@ -24,15 +24,22 @@ npm run build      # → dist/
 npm run preview    # serve the build locally
 ```
 
-## Deploy — GitHub Pages
+## Deploy — Azure Static Web Apps
 
-A workflow is included at `.github/workflows/deploy.yml`. It builds on every push to
-`main` and publishes `dist/` to Pages.
+Production host: **Azure Static Web Apps** (`WealthAcademy` in `ResourceGroup1`, West Europe).
 
-Setup once: **Settings → Pages → Source: GitHub Actions**.
+| URL | Purpose |
+|-----|---------|
+| https://wealthacademy.stackby.me/ | Custom domain (configure in Azure Portal) |
+| https://lemon-river-09f828203.6.azurestaticapps.net/ | Default ASWA hostname |
 
-For a *project* site (`user.github.io/<repo>/`) the workflow sets `VITE_BASE=/<repo>/`
-automatically from the repo name. For a custom domain or user site, set `VITE_BASE=/`.
+CI: `.github/workflows/azure-static-web-apps.yml` — builds on push to `main`, deploys `dist/`.
+
+**GitHub secret required:** `AZURE_STATIC_WEB_APPS_API_TOKEN` (deployment token from Azure).
+
+Build uses `VITE_BASE=/` for the custom subdomain.
+
+**Custom domain DNS:** CNAME `wealthacademy.stackby.me` → `lemon-river-09f828203.6.azurestaticapps.net`, then add hostname in Azure Portal → Static Web App → Custom domains.
 
 ## Structure
 
@@ -79,5 +86,3 @@ src/
 
 A month is editable only while `status === "draft"`. Locking it freezes the numbers and
 feeds the history table; starting a new month carries over assets/debts and the label set.
-
-On GitHub pages
