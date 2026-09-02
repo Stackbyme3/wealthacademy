@@ -17,7 +17,11 @@ export function authTokenOptions(audience) {
  * Access token for Stack API calls. Without refresh tokens, Auth0 uses silent iframe auth.
  */
 export async function getStackAccessToken(getAccessTokenSilently, audience) {
-  return getAccessTokenSilently(authTokenOptions(audience));
+  const tokenPromise = getAccessTokenSilently(authTokenOptions(audience));
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Kunne ikke hente access token i tide')), 15_000);
+  });
+  return Promise.race([tokenPromise, timeoutPromise]);
 }
 
 export function friendlyAuthError(err) {

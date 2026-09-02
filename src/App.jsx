@@ -11,13 +11,18 @@ import Budget from './components/views/Budget.jsx';
 import Rule from './components/views/Rule.jsx';
 import NetWorth from './components/views/NetWorth.jsx';
 import History from './components/views/History.jsx';
+import LoadingShell from './components/LoadingShell.jsx';
 
 function BudgetApp({ defaultName = '', onLogout }) {
   const budget = useBudget();
   const totals = useTotals(budget.displayed);
   const [view, setView] = useState('dashboard');
 
-  if (!budget.loaded) return null;
+  if (!budget.loaded) {
+    return (
+      <LoadingShell message="Henter budsjett…" onLogout={onLogout} />
+    );
+  }
   if (!budget.profileName) {
     return <Onboarding onSubmit={budget.setProfileName} defaultName={defaultName} />;
   }
@@ -54,6 +59,20 @@ function BudgetApp({ defaultName = '', onLogout }) {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {budget.syncError && (
+        <div
+          className="s-body-sm"
+          style={{
+            background: 'rgba(255, 80, 120, 0.15)',
+            borderBottom: '1px solid rgba(255, 80, 120, 0.35)',
+            color: '#fff',
+            padding: '10px 24px',
+            textAlign: 'center',
+          }}
+        >
+          {budget.syncError} — data vises fra nettleser til API er tilgjengelig.
+        </div>
+      )}
       <Header
         view={view}
         onChangeView={setView}
@@ -84,12 +103,15 @@ function BudgetApp({ defaultName = '', onLogout }) {
 function AuthenticatedBudgetApp() {
   const { isAuthenticated, isLoading, user, logout } = useAuth0();
 
-  if (isLoading) return null;
+  const onLogout = () =>
+    logout({ logoutParams: { returnTo: window.location.origin } });
+
+  if (isLoading) {
+    return <LoadingShell onLogout={onLogout} />;
+  }
   if (!isAuthenticated) return <AuthGate />;
 
   const defaultName = user?.given_name || user?.name || '';
-  const onLogout = () =>
-    logout({ logoutParams: { returnTo: window.location.origin } });
 
   return <BudgetApp defaultName={defaultName} onLogout={onLogout} />;
 }

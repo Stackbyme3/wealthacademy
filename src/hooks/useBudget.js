@@ -21,14 +21,14 @@ export function useBudget() {
 
     (async () => {
       try {
-        const initial = await load();
+        const { budget, syncError: loadSyncError } = await load();
         if (!cancelled) {
-          setData(initial);
-          setSyncError(null);
+          setData(budget);
+          setSyncError(loadSyncError);
         }
       } catch (err) {
         if (!cancelled) {
-          setSyncError(err instanceof Error ? err.message : 'Kunne ikke lagre data');
+          setSyncError(err instanceof Error ? err.message : 'Kunne ikke laste data');
         }
       } finally {
         if (!cancelled) setLoaded(true);

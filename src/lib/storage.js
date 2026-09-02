@@ -64,17 +64,21 @@ export async function load() {
       if (isRemoteEmpty(remote) && hasLocalData(local)) {
         await persistBudget(token, local);
         clearLocal();
-        return local;
+        return { budget: local, syncError: null };
       }
 
-      return remote;
+      return { budget: remote, syncError: null };
     } catch (err) {
       console.warn('Remote budget load failed, using localStorage', err);
-      return loadLocal();
+      return {
+        budget: loadLocal(),
+        syncError:
+          err instanceof Error ? err.message : 'Kunne ikke hente data fra Stack',
+      };
     }
   }
 
-  return loadLocal();
+  return { budget: loadLocal(), syncError: null };
 }
 
 /** Save budget — remote when configured, always mirror to localStorage as offline cache. */
