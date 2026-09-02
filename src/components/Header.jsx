@@ -1,7 +1,7 @@
 import { VIEWS } from '../lib/constants.js';
 import { PillButton } from './ui.jsx';
 
-export default function Header({ view, onChangeView, profileName }) {
+export default function Header({ view, onChangeView, profileName, onLogout }) {
   return (
     <div
       style={{
@@ -36,8 +36,15 @@ export default function Header({ view, onChangeView, profileName }) {
         ))}
       </div>
 
-      <div className="s-body-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
-        Hei, {profileName}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="s-body-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+          Hei, {profileName}
+        </div>
+        {onLogout && (
+          <PillButton variant="ghost" onClick={onLogout} style={{ padding: '8px 14px' }}>
+            Logg ut
+          </PillButton>
+        )}
       </div>
     </div>
   );

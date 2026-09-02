@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { PillButton } from './ui.jsx';
 
-export default function Onboarding({ onSubmit }) {
-  const [name, setName] = useState('');
+export default function Onboarding({ onSubmit, defaultName = '' }) {
+  const [name, setName] = useState(defaultName);
   const submit = () => name.trim() && onSubmit(name);
 
   return (
@@ -36,7 +36,8 @@ export default function Onboarding({ onSubmit }) {
         </div>
         <div className="s-display-md" style={{ color: '#fff' }}>Velkommen</div>
         <div className="s-body" style={{ color: 'var(--text-inverse-dim)' }}>
-          Skriv inn navnet ditt. Vi lagrer fremgangen din i denne nettleseren.
+          Skriv inn navnet ditt slik vi viser det i verktøyet. Budsjettdata lagres
+          foreløpig i nettleseren — synk til konto kommer snart.
         </div>
         <input
           placeholder="Ditt navn"
