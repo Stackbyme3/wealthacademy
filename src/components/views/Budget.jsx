@@ -2,14 +2,13 @@ import { Card, HeroCard, TotalRow, PillButton } from '../ui.jsx';
 import LineItems from '../LineItems.jsx';
 import { nok } from '../../lib/format.js';
 
-export default function Budget({ totals, locked, actions, onStart }) {
+export default function Budget({ totals, isFinished, actions, onReopen }) {
   const list = (listKey, addLabel) => (
     <LineItems
       listKey={listKey}
       addLabel={addLabel}
       labels={totals.labels[listKey]}
       values={totals.values[listKey]}
-      locked={locked}
       onLabelChange={actions.setLabel}
       onAmountChange={actions.setAmount}
       onRemove={actions.removeRow}
@@ -19,7 +18,7 @@ export default function Budget({ totals, locked, actions, onStart }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {locked && (
+      {isFinished && (
         <div
           style={{
             background: 'var(--sand-10)',
@@ -34,9 +33,9 @@ export default function Budget({ totals, locked, actions, onStart }) {
           }}
         >
           <div className="s-body-sm" style={{ color: 'var(--text-primary)' }}>
-            Denne måneden er låst, så tall og navn kan ikke endres. Start en ny måned for å redigere.
+            Denne måneden er markert som ferdig. Du kan fortsatt endre tall og navn – alt lagres.
           </div>
-          <PillButton variant="solid" onClick={onStart}>Start ny måned</PillButton>
+          <PillButton onClick={onReopen}>Åpne igjen</PillButton>
         </div>
       )}
 
@@ -79,7 +78,6 @@ export default function Budget({ totals, locked, actions, onStart }) {
           <input
             type="number"
             value={totals.extraDebt}
-            disabled={locked}
             onChange={(e) => actions.setExtraDebt(e.target.value)}
             style={{
               width: 130,

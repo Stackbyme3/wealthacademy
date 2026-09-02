@@ -21,14 +21,13 @@ const amountInput = (width) => ({
 });
 
 /**
- * An editable list of budget rows: the row name and its amount are both
- * editable while the month is a draft, and rows can be added or removed.
+ * An editable list of budget rows: the row name and its amount are always
+ * editable, and rows can be added or removed.
  */
 export default function LineItems({
   listKey,
   labels,
   values,
-  locked,
   amountWidth = 130,
   addLabel,
   onLabelChange,
@@ -52,7 +51,6 @@ export default function LineItems({
           <input
             value={label}
             placeholder="Navn på post"
-            disabled={locked}
             onChange={(e) => onLabelChange(listKey, i, e.target.value)}
             style={labelInput}
             onFocus={(e) => {
@@ -67,13 +65,11 @@ export default function LineItems({
           <input
             type="number"
             value={values[i] || 0}
-            disabled={locked}
             onChange={(e) => onAmountChange(listKey, i, e.target.value)}
             style={amountInput(amountWidth)}
           />
           <button
             title="Fjern post"
-            disabled={locked}
             onClick={() => onRemove(listKey, i)}
             style={{
               width: 28,
@@ -95,7 +91,6 @@ export default function LineItems({
 
       <PillButton
         variant="dashed"
-        disabled={locked}
         onClick={() => onAdd(listKey)}
         style={{ marginTop: 10, padding: '8px 14px' }}
       >

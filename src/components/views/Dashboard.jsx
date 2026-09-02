@@ -1,8 +1,8 @@
 import { Card, Eyebrow, PillButton } from '../ui.jsx';
 import { nok, sparklinePoints, sum } from '../../lib/format.js';
 
-export default function Dashboard({ totals, lockedMonths, onChangeView }) {
-  const netSeries = lockedMonths.map((m) => sum(m.assets) - sum(m.debts));
+export default function Dashboard({ totals, months, onChangeView }) {
+  const netSeries = months.map((m) => sum(m.assets) - sum(m.debts));
 
   return (
     <>

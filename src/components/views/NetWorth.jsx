@@ -2,14 +2,13 @@ import { Card, HeroCard, TotalRow } from '../ui.jsx';
 import LineItems from '../LineItems.jsx';
 import { nok } from '../../lib/format.js';
 
-export default function NetWorth({ totals, locked, actions }) {
+export default function NetWorth({ totals, actions }) {
   const list = (listKey, addLabel) => (
     <LineItems
       listKey={listKey}
       addLabel={addLabel}
       labels={totals.labels[listKey]}
       values={totals.values[listKey]}
-      locked={locked}
       amountWidth={150}
       onLabelChange={actions.setLabel}
       onAmountChange={actions.setAmount}

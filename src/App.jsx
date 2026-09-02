@@ -39,7 +39,6 @@ function BudgetApp({ displayName = '', onLogout, showOnboarding = false }) {
     );
   }
 
-  const locked = !budget.isEditable;
   const actions = {
     setLabel: budget.setLabel,
     setAmount: budget.setAmount,
@@ -52,21 +51,30 @@ function BudgetApp({ displayName = '', onLogout, showOnboarding = false }) {
     dashboard: (
       <Dashboard
         totals={totals}
-        lockedMonths={budget.lockedMonths}
+        months={budget.months}
         onChangeView={setView}
       />
     ),
     budget: (
       <Budget
         totals={totals}
-        locked={locked}
+        isFinished={budget.isFinished}
         actions={actions}
-        onStart={budget.startMonth}
+        onReopen={budget.unlockMonth}
       />
     ),
     rule: <Rule totals={totals} />,
-    networth: <NetWorth totals={totals} locked={locked} actions={actions} />,
-    history: <History lockedMonths={budget.lockedMonths} />,
+    networth: <NetWorth totals={totals} actions={actions} />,
+    history: (
+      <History
+        months={budget.months}
+        selectedId={budget.displayed?.id}
+        onSelect={(id) => {
+          budget.selectMonth(id);
+          setView('budget');
+        }}
+      />
+    ),
   };
 
   return (
@@ -93,9 +101,15 @@ function BudgetApp({ displayName = '', onLogout, showOnboarding = false }) {
       />
       <MonthBar
         month={budget.displayed}
-        isEditable={budget.isEditable}
+        months={budget.months}
+        isFinished={budget.isFinished}
+        hasPrevious={budget.hasPrevious}
+        hasNext={budget.hasNext}
+        onSelect={budget.selectMonth}
+        onStep={budget.stepMonth}
         onStart={budget.startMonth}
         onLock={budget.lockMonth}
+        onUnlock={budget.unlockMonth}
       />
       <main
         style={{

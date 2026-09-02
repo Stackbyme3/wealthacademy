@@ -6,7 +6,8 @@ import { toAmount } from '../lib/format.js';
 const SAVE_DEBOUNCE_MS = 800;
 
 /**
- * App state: profile name + months (at most one editable draft).
+ * App state: profile name + months. Any month can be selected and edited —
+ * "locked" only marks a month as finished, it never blocks editing.
  * Persists to Mongo when API is configured, else localStorage.
  */
 export function useBudget() {
@@ -74,105 +75,128 @@ export function useBudget() {
     [scheduleSave],
   );
 
-  const current = useMemo(
-    () => data.months.find((m) => m.id === data.currentMonthId) || null,
-    [data.months, data.currentMonthId],
+  /** Every month in calendar order — drafts and finished ones alike. */
+  const months = useMemo(() => sortByDate(data.months), [data.months]);
+
+  const lockedMonths = useMemo(() => months.filter((m) => m.status === 'locked'), [months]);
+
+  /** The month on screen: the selected one, falling back to the most recent. */
+  const displayed = useMemo(
+    () => months.find((m) => m.id === data.currentMonthId) || months[months.length - 1] || null,
+    [months, data.currentMonthId],
   );
 
-  const lockedMonths = useMemo(
-    () => sortByDate(data.months.filter((m) => m.status === 'locked')),
-    [data.months],
-  );
+  const selectedIndex = displayed ? months.findIndex((m) => m.id === displayed.id) : -1;
 
-  const displayed = current || lockedMonths[lockedMonths.length - 1] || null;
-
-  const editDraft = useCallback(
+  /** Applies a change to the selected month, finished or not. */
+  const editSelected = useCallback(
     (mutate) => {
-      commit((prev) => ({
-        ...prev,
-        months: prev.months.map((m) => (m.id === prev.currentMonthId ? mutate(m) : m)),
-      }));
+      commit((prev) => {
+        const ordered = sortByDate(prev.months);
+        const target =
+          ordered.find((m) => m.id === prev.currentMonthId) || ordered[ordered.length - 1];
+        if (!target) return prev;
+        return {
+          ...prev,
+          currentMonthId: target.id,
+          months: prev.months.map((m) => (m.id === target.id ? mutate(m) : m)),
+        };
+      });
     },
     [commit],
   );
 
   const setProfileName = useCallback((name) => commit({ profileName: name.trim() }), [commit]);
 
+  const selectMonth = useCallback((id) => commit({ currentMonthId: id }), [commit]);
+
+  const stepMonth = useCallback(
+    (delta) => {
+      const target = months[selectedIndex + delta];
+      if (target) selectMonth(target.id);
+    },
+    [months, selectedIndex, selectMonth],
+  );
+
   const startMonth = useCallback(() => {
     commit((prev) => {
-      const locked = sortByDate(prev.months.filter((m) => m.status === 'locked'));
-      const month = createMonth(locked[locked.length - 1]);
+      const ordered = sortByDate(prev.months);
+      const month = createMonth(ordered[ordered.length - 1]);
       return { ...prev, months: [...prev.months, month], currentMonthId: month.id };
     });
   }, [commit]);
 
-  const lockMonth = useCallback(() => {
-    commit((prev) => ({
-      ...prev,
-      months: prev.months.map((m) =>
-        m.id === prev.currentMonthId ? { ...m, status: 'locked' } : m,
-      ),
-      currentMonthId: null,
-    }));
-  }, [commit]);
+  /** Marks the selected month finished (or reopens it) — editing stays available either way. */
+  const setMonthStatus = useCallback(
+    (status) => editSelected((m) => ({ ...m, status })),
+    [editSelected],
+  );
+
+  const lockMonth = useCallback(() => setMonthStatus('locked'), [setMonthStatus]);
+  const unlockMonth = useCallback(() => setMonthStatus('draft'), [setMonthStatus]);
 
   const setAmount = useCallback(
     (listKey, index, value) =>
-      editDraft((m) => {
+      editSelected((m) => {
         const list = m[listKey].slice();
         list[index] = toAmount(value);
         return { ...m, [listKey]: list };
       }),
-    [editDraft],
+    [editSelected],
   );
 
   const setLabel = useCallback(
     (listKey, index, value) =>
-      editDraft((m) => {
+      editSelected((m) => {
         const labels = ensureLabels(m);
         labels[listKey] = labels[listKey].slice();
         labels[listKey][index] = value;
         return { ...m, labels };
       }),
-    [editDraft],
+    [editSelected],
   );
 
   const addRow = useCallback(
     (listKey) =>
-      editDraft((m) => {
+      editSelected((m) => {
         const labels = ensureLabels(m);
         labels[listKey] = [...labels[listKey], ''];
         return { ...m, labels, [listKey]: [...(m[listKey] || []), 0] };
       }),
-    [editDraft],
+    [editSelected],
   );
 
   const removeRow = useCallback(
     (listKey, index) =>
-      editDraft((m) => {
+      editSelected((m) => {
         const labels = ensureLabels(m);
         labels[listKey] = labels[listKey].filter((_, i) => i !== index);
         return { ...m, labels, [listKey]: (m[listKey] || []).filter((_, i) => i !== index) };
       }),
-    [editDraft],
+    [editSelected],
   );
 
   const setExtraDebt = useCallback(
-    (value) => editDraft((m) => ({ ...m, extraDebt: toAmount(value) })),
-    [editDraft],
+    (value) => editSelected((m) => ({ ...m, extraDebt: toAmount(value) })),
+    [editSelected],
   );
 
   return {
     loaded,
     syncError,
     profileName: data.profileName,
-    current,
-    displayed,
+    months,
     lockedMonths,
-    isEditable: !!current,
+    displayed,
+    isFinished: displayed?.status === 'locked',
+    hasPrevious: selectedIndex > 0,
+    hasNext: selectedIndex >= 0 && selectedIndex < months.length - 1,
     setProfileName,
+    selectMonth,
+    stepMonth,
     startMonth,
     lockMonth,
+    unlockMonth,
     setAmount,
     setLabel,
     addRow,
