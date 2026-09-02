@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Auth0Provider } from '@auth0/auth0-react';
+import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import App from './App.jsx';
 import { auth0Config } from './auth/config.js';
+import { configureRemotePersistence } from './lib/storage.js';
 
 import './styles/tokens/colors.css';
 import './styles/tokens/typography.css';
@@ -13,6 +14,26 @@ import './styles/styles.css';
 import './styles/global.css';
 
 const { domain, clientId, audience, configured } = auth0Config();
+
+function RemotePersistenceSetup({ children }) {
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      configureRemotePersistence({});
+      return;
+    }
+
+    configureRemotePersistence({
+      getAccessToken: () =>
+        getAccessTokenSilently({
+          authorizationParams: audience ? { audience } : undefined,
+        }),
+    });
+  }, [getAccessTokenSilently, isAuthenticated]);
+
+  return children;
+}
 
 function Root() {
   if (!configured) {
@@ -31,7 +52,9 @@ function Root() {
         scope: 'openid profile email',
       }}
     >
-      <App />
+      <RemotePersistenceSetup>
+        <App />
+      </RemotePersistenceSetup>
     </Auth0Provider>
   );
 }

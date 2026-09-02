@@ -1,28 +1,78 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { load, save } from '../lib/storage.js';
 import { createMonth, ensureLabels, sortByDate } from '../lib/months.js';
 import { toAmount } from '../lib/format.js';
 
+const SAVE_DEBOUNCE_MS = 800;
+
 /**
- * The whole app state: a profile name and a list of months, of which at most
- * one is an editable draft. Everything persists to localStorage on change.
+ * App state: profile name + months (at most one editable draft).
+ * Persists to Mongo when API is configured, else localStorage.
  */
 export function useBudget() {
   const [data, setData] = useState({ profileName: null, months: [], currentMonthId: null });
   const [loaded, setLoaded] = useState(false);
+  const [syncError, setSyncError] = useState(null);
+  const saveTimer = useRef(null);
+  const pendingSave = useRef(null);
 
   useEffect(() => {
-    setData(load());
-    setLoaded(true);
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const initial = await load();
+        if (!cancelled) {
+          setData(initial);
+          setSyncError(null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setSyncError(err instanceof Error ? err.message : 'Kunne ikke lagre data');
+        }
+      } finally {
+        if (!cancelled) setLoaded(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
   }, []);
 
-  const commit = useCallback((updater) => {
-    setData((prev) => {
-      const next = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
-      save(next);
-      return next;
-    });
+  const flushSave = useCallback(async (next) => {
+    try {
+      await save(next);
+      setSyncError(null);
+    } catch (err) {
+      setSyncError(err instanceof Error ? err.message : 'Kunne ikke lagre data');
+    }
   }, []);
+
+  const scheduleSave = useCallback(
+    (next) => {
+      pendingSave.current = next;
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => {
+        const payload = pendingSave.current;
+        pendingSave.current = null;
+        if (payload) flushSave(payload);
+      }, SAVE_DEBOUNCE_MS);
+    },
+    [flushSave],
+  );
+
+  const commit = useCallback(
+    (updater) => {
+      setData((prev) => {
+        const next = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+        scheduleSave(next);
+        return next;
+      });
+    },
+    [scheduleSave],
+  );
 
   const current = useMemo(
     () => data.months.find((m) => m.id === data.currentMonthId) || null,
@@ -34,10 +84,8 @@ export function useBudget() {
     [data.months],
   );
 
-  /** The month shown on screen: the open draft, else the most recent locked one. */
   const displayed = current || lockedMonths[lockedMonths.length - 1] || null;
 
-  /** Applies a change to the draft month only — locked months are immutable. */
   const editDraft = useCallback(
     (mutate) => {
       commit((prev) => ({
@@ -116,6 +164,7 @@ export function useBudget() {
 
   return {
     loaded,
+    syncError,
     profileName: data.profileName,
     current,
     displayed,
