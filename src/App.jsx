@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useBudget } from './hooks/useBudget.js';
 import { useTotals } from './hooks/useTotals.js';
 import AuthGate from './auth/AuthGate.jsx';
 import Onboarding from './components/Onboarding.jsx';
+import { displayNameFromUser } from './lib/displayName.js';
 import Header from './components/Header.jsx';
 import MonthBar from './components/MonthBar.jsx';
 import Dashboard from './components/views/Dashboard.jsx';
@@ -13,18 +14,29 @@ import NetWorth from './components/views/NetWorth.jsx';
 import History from './components/views/History.jsx';
 import LoadingShell from './components/LoadingShell.jsx';
 
-function BudgetApp({ defaultName = '', onLogout }) {
+function BudgetApp({ displayName = '', onLogout, showOnboarding = false }) {
   const budget = useBudget();
   const totals = useTotals(budget.displayed);
   const [view, setView] = useState('dashboard');
+  const appliedNameRef = useRef(false);
 
-  if (!budget.loaded) {
+  useEffect(() => {
+    if (!budget.loaded || appliedNameRef.current || budget.profileName) return;
+    const name = displayName.trim();
+    if (!name) return;
+    appliedNameRef.current = true;
+    budget.setProfileName(name);
+  }, [budget.loaded, budget.profileName, displayName, budget.setProfileName]);
+
+  if (!budget.loaded || (displayName && !budget.profileName)) {
     return (
       <LoadingShell message="Henter budsjett…" onLogout={onLogout} />
     );
   }
-  if (!budget.profileName) {
-    return <Onboarding onSubmit={budget.setProfileName} defaultName={defaultName} />;
+  if (!budget.profileName && showOnboarding) {
+    return (
+      <Onboarding onSubmit={budget.setProfileName} defaultName={displayName} />
+    );
   }
 
   const locked = !budget.isEditable;
@@ -111,12 +123,12 @@ function AuthenticatedBudgetApp() {
   }
   if (!isAuthenticated) return <AuthGate />;
 
-  const defaultName = user?.given_name || user?.name || '';
+  const displayName = displayNameFromUser(user);
 
-  return <BudgetApp defaultName={defaultName} onLogout={onLogout} />;
+  return <BudgetApp displayName={displayName} onLogout={onLogout} />;
 }
 
 export default function App({ authBypass = false }) {
-  if (authBypass) return <BudgetApp />;
+  if (authBypass) return <BudgetApp showOnboarding />;
   return <AuthenticatedBudgetApp />;
 }
