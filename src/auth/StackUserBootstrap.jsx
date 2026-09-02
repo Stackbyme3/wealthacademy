@@ -3,6 +3,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { PillButton } from '../components/ui.jsx';
 import { isApiConfigured } from '../lib/api.js';
 import { createUserViaPost } from '../lib/createUser.js';
+import { friendlyAuthError, getStackAccessToken } from '../lib/authToken.js';
 import { auth0Config } from './config.js';
 
 function extractName(user) {
@@ -24,7 +25,7 @@ function extractName(user) {
 }
 
 export default function StackUserBootstrap({ children }) {
-  const { isAuthenticated, isLoading, getAccessTokenSilently, user } = useAuth0();
+  const { isAuthenticated, isLoading, getAccessTokenSilently, logout, user } = useAuth0();
   const { audience } = auth0Config();
   const [phase, setPhase] = useState('idle');
   const [error, setError] = useState(null);
@@ -43,9 +44,7 @@ export default function StackUserBootstrap({ children }) {
       throw new Error('Auth0-profil mangler e-post eller bruker-ID');
     }
 
-    const token = await getAccessTokenSilently({
-      authorizationParams: audience ? { audience } : undefined,
-    });
+    const token = await getStackAccessToken(getAccessTokenSilently, audience);
 
     const { firstName, lastName } = extractName(user);
 
@@ -85,7 +84,7 @@ export default function StackUserBootstrap({ children }) {
       } catch (err) {
         if (!cancelled) {
           setPhase('error');
-          setError(err?.message ?? 'Kunne ikke opprette Stack-konto');
+          setError(friendlyAuthError(err));
         }
       }
     })();
@@ -147,6 +146,15 @@ export default function StackUserBootstrap({ children }) {
           </div>
           <PillButton
             variant="lemon"
+            onClick={() =>
+              logout({ logoutParams: { returnTo: window.location.origin } })
+            }
+            style={{ padding: '14px 22px', fontSize: 15 }}
+          >
+            Logg ut og prøv på nytt
+          </PillButton>
+          <PillButton
+            variant="outline"
             onClick={() => {
               ensuredRef.current = false;
               setRetryKey((k) => k + 1);

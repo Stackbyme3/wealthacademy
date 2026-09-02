@@ -5,6 +5,7 @@ import App from './App.jsx';
 import StackUserBootstrap from './auth/StackUserBootstrap.jsx';
 import { auth0Config } from './auth/config.js';
 import { configureRemotePersistence } from './lib/storage.js';
+import { getStackAccessToken } from './lib/authToken.js';
 
 import './styles/tokens/colors.css';
 import './styles/tokens/typography.css';
@@ -26,10 +27,7 @@ function RemotePersistenceSetup({ children }) {
     }
 
     configureRemotePersistence({
-      getAccessToken: () =>
-        getAccessTokenSilently({
-          authorizationParams: audience ? { audience } : undefined,
-        }),
+      getAccessToken: () => getStackAccessToken(getAccessTokenSilently, audience),
     });
   }, [getAccessTokenSilently, isAuthenticated]);
 
@@ -46,11 +44,10 @@ function Root() {
       domain={domain}
       clientId={clientId}
       cacheLocation="localstorage"
-      useRefreshTokens
       authorizationParams={{
         redirect_uri: window.location.origin,
         ...(audience ? { audience } : {}),
-        scope: 'openid profile email read:user offline_access',
+        scope: 'openid profile email',
       }}
     >
       <StackUserBootstrap>
