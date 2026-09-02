@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import App from './App.jsx';
+import StackUserBootstrap from './auth/StackUserBootstrap.jsx';
 import { auth0Config } from './auth/config.js';
 import { configureRemotePersistence } from './lib/storage.js';
 
@@ -49,12 +50,14 @@ function Root() {
       authorizationParams={{
         redirect_uri: window.location.origin,
         ...(audience ? { audience } : {}),
-        scope: 'openid profile email',
+        scope: 'openid profile email read:user offline_access',
       }}
     >
-      <RemotePersistenceSetup>
-        <App />
-      </RemotePersistenceSetup>
+      <StackUserBootstrap>
+        <RemotePersistenceSetup>
+          <App />
+        </RemotePersistenceSetup>
+      </StackUserBootstrap>
     </Auth0Provider>
   );
 }

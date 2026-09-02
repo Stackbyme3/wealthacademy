@@ -56,8 +56,8 @@ export default function AuthGate() {
           Budsjett &amp; formue
         </div>
         <div className="s-body" style={{ color: 'var(--text-inverse-dim)' }}>
-          Logg inn med Stack-kontoen din for å bruke budsjettverktøyet. Data lagres på
-          kontoen din (Mongo-kobling kommer snart).
+          Logg inn eller opprett Stack-konto for å bruke budsjettverktøyet. Data lagres på
+          kontoen din.
         </div>
 
         {!configured && (

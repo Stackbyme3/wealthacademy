@@ -1,5 +1,9 @@
 const API_HOST = (import.meta.env.VITE_API_HOST ?? '').replace(/\/$/, '');
 
+export function getApiHost() {
+  return API_HOST;
+}
+
 export function isApiConfigured() {
   return Boolean(API_HOST);
 }
