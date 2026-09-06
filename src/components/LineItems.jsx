@@ -64,7 +64,8 @@ export default function LineItems({
           />
           <input
             type="number"
-            value={values[i] || 0}
+            value={values[i] === 0 || values[i] == null ? '' : values[i]}
+            placeholder="0"
             onChange={(e) => onAmountChange(listKey, i, e.target.value)}
             style={amountInput(amountWidth)}
           />

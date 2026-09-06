@@ -3,28 +3,29 @@ import { PillButton } from '../components/ui.jsx';
 import { auth0Config } from './config.js';
 
 const TERMS_URL = 'https://stackby.me/betingelser-og-vilkar';
+const PRIVACY_URL = 'https://stackby.me/personvernopplysninger';
+
+const linkStyle = { color: 'inherit', textDecoration: 'underline' };
 
 function LoginConsent() {
   return (
     <p
       className="s-body-sm"
       style={{
-        color: 'rgba(255,255,255,0.75)',
-        textAlign: 'center',
+        color: 'rgba(255,255,255,0.72)',
         margin: 0,
-        lineHeight: 1.5,
+        lineHeight: 1.55,
       }}
     >
-      Ved å opprette en profil godtar du{' '}
-      <a
-        href={TERMS_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ color: 'inherit', textDecoration: 'underline' }}
-      >
-        vilkår og betingelser
-      </a>{' '}
-      og abonnement på vårt nyhetsbrev
+      Ved å opprette en konto godtar du våre{' '}
+      <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+        bruksvilkår
+      </a>
+      . Les hvordan vi behandler opplysningene dine i vår{' '}
+      <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+        personvernerklæring
+      </a>
+      .
     </p>
   );
 }
@@ -82,9 +83,14 @@ export default function AuthGate() {
         <div className="s-display-md" style={{ color: '#fff' }}>
           Budsjett &amp; formue
         </div>
-        <div className="s-body" style={{ color: 'var(--text-inverse-dim)' }}>
-          Logg inn eller opprett Stack-konto for å bruke budsjettverktøyet. Data lagres på
-          kontoen din.
+        <div
+          className="s-body-sm"
+          style={{ color: 'rgba(255,255,255,0.78)', lineHeight: 1.55 }}
+        >
+          Logg inn eller opprett en Stack-konto for å bruke budsjettverktøyet.
+          Opplysningene du legger inn om inntekt, utgifter, eiendeler og gjeld lagres på
+          Stack-kontoen din, slik at du kan oppdatere budsjettet og følge utviklingen i
+          nettoformuen din over tid.
         </div>
 
         {!configured && (
